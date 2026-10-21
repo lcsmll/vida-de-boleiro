@@ -1,0 +1,6 @@
+rascunhos/
+.claude/
+*.png
+!assets/**/*.png
+.DS_Store
+CLAUDE.md

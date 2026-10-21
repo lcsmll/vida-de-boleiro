@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vida de Boleiro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div class="screen on" id="s-intro"><div class="wrap">
+  <div class="brand"><span class="lg" aria-hidden="true">⚽</span><b>Vida de Boleiro</b></div>
+  <h1 class="hero-t">Do sinal de trânsito à Copa do Mundo.</h1>
+  <p class="lede">Viva a carreira de um jogador mês a mês: campeonatos, mercado, festas, família e seleção. Você controla os riscos. No fim, a história decide se você virou lenda ou flopado.</p>
+  <div class="stack">
+    <button class="btn wide" id="b-continue" hidden></button>
+    <button class="btn wide" id="b-start">Criar novo jogador</button>
+    <button class="btn ghost wide" id="b-edit">Editar nomes dos times</button>
+  </div>
+  <p class="note" style="margin-top:16px">Você nasce com um potencial oculto. As escolhas decidem se você chega nele.</p>
+</div></div>
+
+<div class="screen" id="s-create"><div class="wrap">
+  <h2>Quem é você?</h2>
+  <p class="sub">Isso vai na sua ficha pra sempre.</p>
+  <div class="prev" aria-hidden="true"><span id="c-shirt"></span><div><b id="shirt-nick">Seu apelido</b><small id="shirt-meta">Escolha posição e pé</small></div></div>
+  <div class="field"><label for="f-nome">Nome completo</label><input id="f-nome" autocomplete="off" maxlength="40" placeholder="Ex.: Carlos Eduardo Silva"></div>
+  <div class="row n">
+    <div class="field"><label for="f-num">Camisa</label><input id="f-num" type="number" min="1" max="99" value="10" inputmode="numeric"></div>
+    <div class="field"><label for="f-apelido">Apelido</label><input id="f-apelido" autocomplete="off" maxlength="18" placeholder="Ex.: Dudu"></div>
+  </div>
+  <div class="field"><label for="f-nasc">Data de nascimento</label><input id="f-nasc" type="date" min="1985-01-01" max="2020-12-31" value="2012-03-14"></div>
+  <fieldset><legend class="leg">Posição</legend><div class="chips" id="c-pos"></div></fieldset>
+  <fieldset><legend class="leg">Pé bom</legend><div class="chips" id="c-pe"></div></fieldset>
+  <div class="row">
+    <div class="field"><label for="f-uf">Estado</label><select id="f-uf"></select></div>
+    <div class="field"><label for="f-cidade">Cidade natal</label><input id="f-cidade" autocomplete="off" maxlength="30" placeholder="Ex.: Juiz de Fora"></div>
+  </div>
+  <p class="err" id="f-err" role="alert"></p>
+  <button class="btn wide" id="b-go">Começar a vida</button>
+  <div class="stack"><button class="btn ghost wide" id="b-back1">Voltar</button></div>
+</div></div>
+
+<div class="screen" id="s-teams"><div class="wrap">
+  <h2>Editar times</h2>
+  <p class="sub">Troque nomes, cores e força dos clubes. Fica salvo só neste navegador. Ligas aceitas: <span id="t-ligas"></span>. Força (t) de 1 a 5.</p>
+  <textarea id="t-json" spellcheck="false" aria-label="Lista de clubes em JSON"></textarea>
+  <p class="err" id="t-err" role="alert"></p>
+  <div class="stack">
+    <button class="btn wide" id="t-save">Salvar times</button>
+    <button class="btn ghost wide" id="t-reset">Voltar aos times originais</button>
+    <button class="btn ghost wide" id="t-back">Voltar</button>
+  </div>
+</div></div>
+
+<div class="screen" id="s-game">
+  <header class="appbar"><div class="in">
+    <span id="h-ava" aria-hidden="true"></span>
+    <div class="nm"><span id="h-nick"></span><small id="h-club"></small></div>
+    <span class="datep" id="h-date"></span>
+  </div></header>
+  <div class="board">
+    <div class="sheet-wrap" id="sheet" hidden><div class="sheet" id="sheet-in" role="region" aria-labelledby="sh-who"></div></div>
+    <main class="tabs">
+      <section class="tab on" id="t-home" aria-label="Início"></section>
+      <section class="tab" id="t-acts" aria-label="Ações"></section>
+      <section class="tab" id="t-comp" aria-label="Competições"></section>
+      <section class="tab" id="t-merc" aria-label="Mercado"></section>
+      <section class="tab" id="t-perf" aria-label="Perfil"></section>
+    </main>
+  </div>
+  <nav class="bnav" id="bnav" aria-label="Navegação"><div class="in">
+    <button data-tab="home" aria-current="page"><span aria-hidden="true">🏠</span>Início</button>
+    <button data-tab="acts"><span aria-hidden="true">⚡</span>Ações</button>
+    <button data-tab="comp"><span aria-hidden="true">🏆</span>Competições</button>
+    <button data-tab="merc"><span aria-hidden="true">💼</span>Mercado</button>
+    <button data-tab="perf"><span aria-hidden="true">👤</span>Perfil</button>
+  </div></nav>
+</div>
+
+<div class="screen" id="s-end"><div class="wrap">
+  <p class="sub" id="e-reason" style="text-align:center;margin:10px 0 0"></p>
+  <h2 class="verdict" id="e-verdict"></h2>
+  <p class="why" id="e-why"></p>
+  <p class="potline" id="e-pot"></p>
+  <div class="figmode" id="e-figmode" role="group" aria-label="Estilo da carta"><button data-m="carta" aria-pressed="true">🃏 Carta</button><button data-m="figurinha" aria-pressed="false">📒 Figurinha</button></div>
+  <div class="fig" id="e-fig"></div>
+  <div class="nums" id="e-nums"></div>
+  <div class="card"><h3>Títulos</h3><ul class="trophies" id="e-tit"></ul></div>
+  <div class="card"><h3>Prêmios</h3><ul class="trophies" id="e-pre"></ul></div>
+  <div class="card"><h3>Clubes</h3><ul class="trophies" id="e-clu"></ul></div>
+  <div class="card"><h3>Temporada a temporada</h3><div id="e-hist"></div></div>
+  <div class="card"><h3>A história</h3><ol class="timeline" id="e-time"></ol></div>
+  <div class="stack">
+    <button class="btn wide" id="b-png">⬇️ Baixar imagem da carta</button>
+    <button class="btn ghost wide" id="b-copy">Copiar resumo em texto</button>
+    <button class="btn ghost wide" id="b-again">Jogar de novo com este jogador</button>
+    <button class="btn ghost wide" id="b-new">Criar outro jogador</button>
+  </div>
+  <p class="msg" id="e-msg" aria-live="polite"></p>
+</div></div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
