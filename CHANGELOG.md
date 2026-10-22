@@ -5,6 +5,16 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e
 
 ## [Não lançado]
 
+### Corrigido
+- O profissional começava em janeiro mesmo com o jogador ainda com 16 anos. Agora começa no primeiro janeiro em que ele já tem 17.
+- A tela do mês mostrava "Fevereiro De 2025"; agora só o mês fica com inicial maiúscula.
+- Um momento-chave podia ser montado depois do fim da competição e travar o jogo com erro.
+- O ano de estreia na carta final usava sempre o ano dos 17; agora usa o ano em que o profissional começou de fato.
+- A lesão de joelho podia aparecer mais vezes que o limite quando os outros tipos de lesão já tinham saído. Agora, sem lesão nova disponível, a carta não aparece (o tempo fora continua valendo).
+
+### Alterado
+- Banimento menos frequente: o convite para manipular apostas aparece menos e, se aceito, dá 25% de chance de banimento (antes 40%).
+
 ## [0.2.0] - 2026-10-21
 
 ### Adicionado

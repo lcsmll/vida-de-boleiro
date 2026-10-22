@@ -127,7 +127,7 @@ function renderFig(){
       <div class="stk-foot"><span>Auge <b>${CAR.peak}</b></span><span><b>${CAR.jogos}</b> jogos</span><span><b>${k1}</b> ${l1}</span><span><b>${CAR.titulos.length}</b> títulos</span></div>
     </div>`;
     return;}
-  const anos=pro&&Y>BY+17?`${BY+17}–${Y}`:pro?String(Y):"Só na base";
+  const y0=FL.proY||BY+17,anos=pro&&Y>y0?`${y0}–${Y}`:pro?String(Y):"Só na base";
   const nums=[[CAR.jogos,"jogos"],[k1,l1],[CAR.titulos.length,"títulos"],[CAR.selJogos,"seleção"]];
   $("e-fig").innerHTML=`<div class="vb t-${TIER[END.v]||"boleiro"}">
     <div class="vb-top"><span class="vb-brand">⚽ Vida de Boleiro</span><span class="vb-yr">${anos}</span></div>

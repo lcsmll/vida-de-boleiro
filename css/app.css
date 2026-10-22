@@ -85,7 +85,7 @@ fieldset{border:0;padding:0;margin:0 0 14px}
 .kv:last-child{border-bottom:0}
 .kv span{color:var(--muted)}.kv b{text-align:right}
 .month{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-.month b{font-family:var(--cond);font-size:1.9rem;font-weight:800;line-height:1;text-transform:capitalize}
+.month b{font-family:var(--cond);font-size:1.9rem;font-weight:800;line-height:1}
 .agenda{margin:8px 0 12px;padding:0;list-style:none;display:grid;gap:6px}
 .agenda li{display:flex;gap:8px;align-items:center;font-size:.92rem}
 .energy{display:flex;gap:4px;align-items:center}

@@ -333,17 +333,17 @@ function selTournamentW(){
   return t;
 }
 // Cada momento-chave sai no máximo 3 vezes por carreira, nunca dois iguais em seguida
-function keyMoment(){FL.kmN=FL.kmN||{};const pool=KM.filter(k=>k.id!==FL.lastKM&&(FL.kmN[k.id]||0)<3&&(!k.cond||k.cond()));if(!pool.length) return null;
+function keyMoment(){if(!COMP||COMP.ended) return null;FL.kmN=FL.kmN||{};const pool=KM.filter(k=>k.id!==FL.lastKM&&(FL.kmN[k.id]||0)<3&&(!k.cond||k.cond()));if(!pool.length) return null;
   FL.mod=0;const k=pick(pool);FL.lastKM=k.id;FL.kmN[k.id]=(FL.kmN[k.id]||0)+1;return Object.assign(k.mk(),{km:true});}
 
 function startPro(sal){
   set({PHASE:"pro",WORLD:{tier:{},teams:{}}});FL.formador=FL.club;CAR.clubes.push(FL.club.n);FL.contrato={salario:sal,temp:3};FL.gastos=0;FL.mod=0;
   if(!FL.agente) FL.agente={n:"Sem empresário",com:0,mult:.7};
   FL.contQual=tierOf(FL.club)>=4||(tierOf(FL.club)===3&&chance(.35));
-  set({Y:BY+17,M:0});set({AGE:Y-BY-(BM>0?1:0)});FL.bday=BM===0?Y:null;
+  set({Y:BY+17+(BM>0?1:0),M:0});FL.proY=Y;set({AGE:Y-BY-(BM>0?1:0)});FL.bday=BM===0?Y:null;
   Q.push(()=>{monthStart();return null;});
   return C("Capítulo 1","🎬","estadio",`<p><b>O profissional.</b></p><p>${esc(P.apelido)}, ${posName().toLowerCase()}, camisa ${P.numero}. Janeiro de ${Y}. Os olheiros dizem que você pode chegar a ${potStars()}. Mas potencial não ganha jogo.</p><p class="small">Agora a vida anda mês a mês. Use a aba Ações pra treinar, curtir, cuidar da cabeça e do bolso, e avance o mês quando estiver pronto.</p>`,
-    [O("⚽","Entrar em campo")],{big:true,age:16,chap:"Fim do prólogo"});
+    [O("⚽","Entrar em campo")],{big:true,age:17,chap:"Fim do prólogo"});
 }
 /* ===================== Motor de cartas ===================== */
 function next(){

@@ -67,7 +67,7 @@ function renderHome(){
   if(S.fad>=70&&!FL.lesao) alerts.push(`<div class="alert w">😮‍💨 Cansaço alto: risco de lesão maior e rendimento menor</div>`);
   if(S.moral<=30) alerts.push(`<div class="alert w">😔 Moral baixa: seu rendimento está caindo</div>`);
   const t=COMP&&!COMP.ended?sorted():null,pos=t?myPos():0,me=t?t[pos-1]:null,n=pctN();
-  h.innerHTML=`<div class="card"><div class="month"><b>${MES[M]} de ${Y}</b><span class="energy" aria-label="Energia ${en} de 4">${[0,1,2,3].map(i=>`<i class="${i<en?"on":""}"></i>`).join("")}</span></div>
+  h.innerHTML=`<div class="card"><div class="month"><b>${MES[M][0].toUpperCase()+MES[M].slice(1)} de ${Y}</b><span class="energy" aria-label="Energia ${en} de 4">${[0,1,2,3].map(i=>`<i class="${i<en?"on":""}"></i>`).join("")}</span></div>
       <ul class="agenda">${agenda().map(x=>`<li>${x}</li>`).join("")}</ul>
       ${alerts.join("")}
       <div class="meters"><div class="meter"><div class="lb"><span>😮‍💨 Cansaço</span><b>${Math.round(S.fad)}${dchip((LASTCH||{}).fad)}</b></div><div class="bar fad"><i style="width:${S.fad}%"></i></div></div>

@@ -18,7 +18,7 @@ const LESOES=[
 ];
 function lesaoCard(){FL.lesN=FL.lesN||{};
   const pool=LESOES.filter(l=>(!l.cond||l.cond())&&(l.id==="joelho"?(FL.lesN.joelho||0)<2:!FL.lesN[l.id]));
-  const l=pool.length?pick(pool):LESOES[0];FL.lesN[l.id]=(FL.lesN[l.id]||0)+1;return l.mk();}
+  if(!pool.length) return null;const l=pick(pool);FL.lesN[l.id]=(FL.lesN[l.id]||0)+1;return l.mk();}
 function lesaoJoelho(){return C("Departamento médico","🦵","hospital",`Ruptura do ligamento do joelho. O médico do clube quer operar já. Um especialista indica tratamento conservador.`,
   [O("🔪","Operar",{corpo:-12,bola:-5},{log:"Rompeu o ligamento do joelho e operou"}),
    O("🩹","Tratamento conservador",{corpo:-5},{then:()=>chance(.5)?C("Departamento médico","🦵","hospital",`O joelho falhou de novo no primeiro treino. Agora é cirurgia, e o tempo perdido dobrou.`,[O("😣","Operar",{corpo:-14,bola:-6,cabeca:-5},{log:"Joelho falhou duas vezes"})],{bad:true}):null})],{bad:true});}
@@ -52,9 +52,9 @@ const EV=[
     [O("💵","Emprestar",{sal:-.12,familia:10}),O("✋🏽","Negar",{familia:-10,cabeca:3})])},
   {id:"dudu",w:1,cond:()=>AGE>=20,mk:()=>C("Dudu, amigo de infância","🧒🏽","rua",`Seu parceiro do futsal da escola está desempregado. Pede pra trabalhar com você, qualquer coisa.`,
     [O("🚗","Contratar de motorista",{familia:6,cabeca:5,sal:-.03},{log:"Levou o amigo de infância Dudu pra trabalhar com ele"}),O("😶","Não dá pra misturar",{familia:-6})])},
-  {id:"aposta",w:.9,cond:()=>AGE>=19,mk:()=>C("Desconhecido no bar","🎲","festa",`“Toma um amarelo no primeiro tempo domingo. Duzentos mil no seu nome, ninguém fica sabendo.”`,
+  {id:"aposta",w:.6,cond:()=>AGE>=19,mk:()=>C("Desconhecido no bar","🎲","festa",`“Toma um amarelo no primeiro tempo domingo. Duzentos mil no seu nome, ninguém fica sabendo.”`,
     [O("🚔","Recusar e denunciar",{cabeca:8,fama:5},{log:"Denunciou um esquema de apostas"}),
-     O("🟨","Topar",{g:2e5,cabeca:-15},{then:()=>chance(.4)?C("Polícia Federal","🚨","policia",`Operação contra manipulação de apostas. Seu nome está nas mensagens. O tribunal desportivo te bane do futebol.`,[O("⛔","Fim",{},{end:"banido",log:"Banido do futebol por manipulação de apostas"})],{bad:true}):null})])},
+     O("🟨","Topar",{g:2e5,cabeca:-15},{then:()=>chance(.25)?C("Polícia Federal","🚨","policia",`Operação contra manipulação de apostas. Seu nome está nas mensagens. O tribunal desportivo te bane do futebol.`,[O("⛔","Fim",{},{end:"banido",log:"Banido do futebol por manipulação de apostas"})],{bad:true}):null})])},
   {id:"suplemento",w:.7,mk:()=>C("Preparador particular","💊","hospital",`Ele oferece um suplemento “que nenhum exame pega”. Diz que três jogadores da Europa usam.`,
     [O("🙅🏽","Recusar",{cabeca:5}),O("💊","Usar",{corpo:8,bola:4},{then:()=>chance(.4)?C("Exame antidoping","🧪","imprensa",`Positivo. Suspensão de um ano e seu nome em todos os jornais do país.`,[O("😶","Cumprir a suspensão",{bola:-12,fama:-15,cabeca:-10,sal:-.3},{log:"Suspenso por doping"})],{bad:true}):null})])},
   {id:"lesao",rep:5,gap:10,w:()=>(100-S.corpo)/70+(AGE>29?.3:0),mk:lesaoCard},
