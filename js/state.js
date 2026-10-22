@@ -9,8 +9,15 @@ let P=null,FL=null,S,Q=[],cur=null,LOG,CAR,AGE=7,PHASE="pre",USED=new Set(),POT=
 let Y=2026,M=0,BY=2019,BM=0,FEED=[],LASTCH=null,LASTO=null,REP=null,TAB="home",CTAB="liga";
 const year=()=>PHASE==="pro"?Y:BY+AGE;
 const posName=()=>POS.find(x=>x.id===P.pos).n;
-const ageAdj=()=>AGE<=16?-6:AGE===17?-4:AGE===18?-3:AGE===19?-2:AGE===20?-1:AGE>=34?-(AGE-33)*1.5:0;
-const ovr=()=>Math.round(clamp(Math.min(30+S.bola*.35+S.corpo*.2+S.cabeca*.15,POT+(S.cabeca>=70?2:0))+ageAdj(),35,99));
+// Defensores aparecem pelos números de defesa: g gols, a assistências, l jogos sem sofrer gol, df defesas (goleiro) ou desarmes
+const DEFP=["GOL","ZAG","LAT","VOL"];
+const keyStats=()=>({GOL:["l","df"],ZAG:["g","df"],LAT:["a","df"],VOL:["df","a"]}[P.pos]||["g","a"]);
+const statName=(k,short)=>short?{g:"G",a:"A",l:"SG",df:P.pos==="GOL"?"DEF":"DES"}[k]:{g:"gols",a:"assist.",l:"sem sofrer gol",df:P.pos==="GOL"?"defesas":"desarmes"}[k];
+// Goleiro envelhece mais devagar: a queda pela idade começa aos 36
+const ageAdj=()=>{const v=P&&P.pos==="GOL"?2:0;return AGE<=16?-6:AGE===17?-4:AGE===18?-3:AGE===19?-2:AGE===20?-1:AGE>=34+v?-(AGE-33-v)*1.5:0;};
+// Peso de cada atributo no overall por posição (soma sempre .7): defensor depende mais de corpo e cabeça
+const OW={GOL:[.25,.2,.25],ZAG:[.25,.25,.2],LAT:[.3,.25,.15],VOL:[.3,.2,.2],MEI:[.35,.15,.2],PON:[.4,.2,.1],ATA:[.35,.2,.15]};
+const ovr=()=>{const [b,c,k]=OW[P&&P.pos]||OW.ATA;return Math.round(clamp(Math.min(30+S.bola*b+S.corpo*c+S.cabeca*k,POT+(S.cabeca>=70?2:0))+ageAdj(),35,99));};
 const mv=(o=ovr())=>3e5*Math.pow(1.2,o-55)*(AGE<22?1.4:AGE<=27?1.2:AGE<=30?1:AGE<=32?.6:.3);
 const log=t=>{LOG.push({age:AGE,y:year(),t});};
 function clubSalary(c,o=ovr()){
@@ -51,4 +58,4 @@ function set(o){
   if("SEA" in o) SEA=o.SEA;
 }
 
-export {clubSalary,potStars,set,CLUBS,P,FL,S,Q,cur,LOG,CAR,AGE,PHASE,USED,POT,busy,Y,M,BY,BM,FEED,LASTCH,LASTO,REP,TAB,CTAB,year,posName,ageAdj,ovr,mv,log,salAtual,WORLD,COMP,SEA};
+export {DEFP,keyStats,statName,OW,clubSalary,potStars,set,CLUBS,P,FL,S,Q,cur,LOG,CAR,AGE,PHASE,USED,POT,busy,Y,M,BY,BM,FEED,LASTCH,LASTO,REP,TAB,CTAB,year,posName,ageAdj,ovr,mv,log,salAtual,WORLD,COMP,SEA};

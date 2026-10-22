@@ -1,14 +1,14 @@
-import {C,O,REG,chance,esc,fmt,rand} from "./data.js";
+import {C,O,REG,chance,esc,fmt,rand,ufNome} from "./data.js";
 import {CAR,CLUBS,FL,P,POT,S,clubSalary,set} from "./state.js";
 import {startPro} from "./engine.js";
 
 const bigClub = uf => { const n=REG[uf]||"Amazônia EC";
   return CLUBS.find(c=>c.uf===uf&&c.l==="BR"&&c.t>=3) || CLUBS.find(c=>c.n===n) || CLUBS.filter(c=>c.l==="BR"&&c.t>=3)[0] || {n,l:"BR",t:4,c:["#1F4FC9","#fff"]}; };
 const midClub = uf => ({n:"Operário-"+uf,l:"BR",t:2,c:["#111111","#F2B705"],uf});
-const localClub = () => ({n:"EC "+P.cidade,l:"BR",t:1,c:["#0B6E3A","#ffffff"],uf:P.uf});
+const localClub = () => ({n:"EC Unidos-"+P.uf,l:"BR",t:1,c:["#0B6E3A","#ffffff"],uf:P.uf});
 /* ---------- Prólogo ---------- */
 function prologue(){
-  const c=P.cidade,uf=P.uf,big=bigClub(uf),fraco=P.pe==="Destro"?"esquerdo":"direito",loc=localClub();
+  const uf=P.uf,big=bigClub(uf),fraco=P.pe==="Destro"?"esquerdo":"direito",loc=localClub();
   const coach={
     GOL:["Goleiro bom não pula bonito, pula certo. Fica depois do treino pra pegar chute?",O("🧤","Fico até escurecer",{corpo:8,bola:5,familia:-5}),O("🍲","Vou pra casa jantar",{familia:10,bola:-4})],
     ZAG:["Zagueiro que sai jogando vale ouro. Mas primeiro tem que ganhar a dividida. Qual você treina?",O("🎯","A saída de bola",{bola:8,corpo:-4}),O("💥","A dividida",{corpo:10,cabeca:-5})],
@@ -20,7 +20,7 @@ function prologue(){
   }[P.pos];
   const A=(age,chap,card)=>Object.assign(card,{age,chap});
   return [
-    A(7,"Infância",C("Narrador","📍","rua",`${esc(c)}, ${uf}. Você tem 7 anos e uma bola de capotão que um dia foi branca. Na rua, todo mundo sabe: quando ela cai no seu pé, demora pra voltar.`,[O("⚽","Bora jogar")])),
+    A(7,"Infância",C("Narrador","📍","rua",`${ufNome(uf)}. Você tem 7 anos e uma bola de capotão que um dia foi branca. Na rua, todo mundo sabe: quando ela cai no seu pé, demora pra voltar.`,[O("⚽","Bora jogar")])),
     A(7,"Infância",C("Sua mãe","👩🏽","casa",`“Filho, a geladeira tá vazia de novo. Não dá pra pagar escolinha. Se quiser chuteira, vai ter que ser do seu jeito.”`,
       [O("🧹","Ajudar em casa",{familia:10,cabeca:5}),O("🐷","Juntar pra chuteira",{bola:4,familia:-5})])),
     A(8,"Infância",C("Kaio, vizinho","🚦","sinal",`“Vendo bala no sinal da avenida. Dá uns 60 reais na semana boa. Vem comigo depois da escola?”`,
@@ -39,14 +39,14 @@ function prologue(){
       [O("🦶","Treinar o pé fraco",{bola:8,corpo:-5}),O("🎯","Caprichar no pé bom",{bola:4,cabeca:5})],{cond:()=>P.pe!=="Ambidestro"})),
     A(11,"Escolinha",C("Dudu, seu melhor amigo","🧒🏽","escola",`“O futsal da escola vai disputar o estadual. Treino toda noite depois da aula. Tá dentro?”`,
       [O("🛋️","Tô fora",{familia:10,corpo:4}),O("🏅","Tô dentro",{bola:8,corpo:4,familia:-10},{log:"Jogou o estadual de futsal pela escola"})])),
-    A(12,"A peneira",C("Olheiro","🕶️","campo",`“Te vi na várzea domingo. Sábado tem peneira no ${big.n}, na capital. São horas de ônibus e eu não pago a passagem.”`,
+    A(12,"A peneira",C("Olheiro","🕶️","peneira",`“Te vi na várzea domingo. Sábado tem peneira no ${big.n}, na capital. São horas de ônibus e eu não pago a passagem.”`,
       [O("🏠","Não tenho como ir",{familia:10},{set:{peneira:false},club:loc,log:`Entrou na base do ${loc.n}`}),O("🚌","Eu vou",{familia:-10,corpo:-5,g:-40},{then:resultadoPeneira})])),
     ()=>{set({AGE:13});return FL.club.t>1
       ?A(13,"Base",C("Sua mãe","👩🏽","casa",`“O CT do ${FL.club.n} fica longe demais. Vai morar no alojamento ou pegar dois ônibus todo dia?”`,
         [O("🚌","Vou e volto",{familia:10,corpo:-10}),O("🛏️","Morar no alojamento",{bola:8,cabeca:4,familia:-15},{log:"Foi morar no alojamento, longe de casa"})]))
       :A(13,"Base",C("Seu pai","👨🏽","casa",`“Arrumei um bico pra você no mercado, sábado e domingo. Ajuda a pagar as contas.”`,
         [O("🛒","Trabalhar",{familia:15,bola:-5,corpo:-5,g:200}),O("⚽","Fim de semana é jogo",{bola:8,familia:-15})]));},
-    A(14,"Base",C("Marquinhos, empresário","💼","contrato",`“Assina comigo hoje e eu te dou um celular e 500 reais por mês. Com dezoito você tá na Europa. Minha comissão? Só 30%, coisa pouca.”`,
+    A(14,"Base",C("Marquinhos, empresário","💼","empresario",`“Assina comigo hoje e eu te dou um celular e 500 reais por mês. Com dezoito você tá na Europa. Minha comissão? Só 30%, coisa pouca.”`,
       [O("✋🏽","Recusar",{cabeca:10,familia:-5}),O("✍🏽","Assinar",{familia:10,cabeca:-10,g:1500},{set:{agente:{n:"Marquinhos",com:.3,mult:1.1}},log:"Assinou com o empresário Marquinhos (30% de comissão)"})])),
     A(14,"Base",C("Colega de alojamento","🧑🏾","festa",`“Tem festa sábado na casa de um dos caras do sub-20. Ninguém vai saber.”`,
       [O("😴","Fico e descanso",{corpo:8,cabeca:5}),
@@ -59,9 +59,9 @@ function prologue(){
     A(15,"Base",C("Treinador do sub-17","📋","vestiario",`“A ${P.numero} é do titular. Quer ela? Ganha a vaga dele no treino.”`,
       [O("⏳","Esperar minha vez",{cabeca:10,bola:-4}),O("🔥","Ir pra cima no treino",{bola:8,corpo:-5,cabeca:-5})])),
     P.pos==="GOL"
-      ?A(16,"Final",C("Final do sub-17","🏆","estadio",`Pênaltis. Último batedor deles. Se você pegar, o título é de vocês. Ele ajeita a bola e te encara.`,
+      ?A(16,"Final",C("Final do sub-17","🏆","penalti",`Pênaltis. Último batedor deles. Se você pegar, o título é de vocês. Ele ajeita a bola e te encara.`,
         [O("🧍🏽","Esperar até o fim",{},{then:()=>penaltiBase(.28)}),O("↙️","Escolher um canto",{},{then:()=>penaltiBase(.22)})],{big:true}))
-      :A(16,"Final",C("Final do sub-17","🏆","estadio",`Um a um, acréscimos, pênalti pra vocês. O capitão te entrega a bola: “É tua.”`,
+      :A(16,"Final",C("Final do sub-17","🏆","penalti",`Um a um, acréscimos, pênalti pra vocês. O capitão te entrega a bola: “É tua.”`,
         [O("↘️","Bater no canto",{},{then:()=>penaltiBase(.45)}),O("🥄","Cavadinha",{fama:5},{then:()=>penaltiBase(.32)})],{big:true})),
     ()=>{set({AGE:16});const sal=clubSalary(FL.club,62)*.5;
       let t=`“Contrato profissional com o ${FL.club.n}: ${fmt(sal)} por ano, três temporadas. Você estreia no time de cima.”`;
@@ -74,13 +74,13 @@ function resultadoPeneira(){
   const big=bigClub(P.uf),mid=midClub(P.uf),score=S.bola*.5+S.corpo*.3+S.cabeca*.2+rand(-10,10)+(POT-75)*.3;
   const A=card=>Object.assign(card,{age:12,chap:"A peneira"});
   if(score>=52){FL.club=big;FL.promessa=true;
-    return A(C("Portão do CT","📜","estadio",`Duzentos meninos, uma lista colada no portão. Você procura três vezes até acreditar: seu nome está lá. Aprovado no ${big.n}.`,
+    return A(C("Portão do CT","📜","peneira",`Duzentos meninos, uma lista colada no portão. Você procura três vezes até acreditar: seu nome está lá. Aprovado no ${big.n}.`,
       [O("📞","Ligar pra casa chorando",{familia:10},{log:`Aprovado na peneira do ${big.n}`}),O("🧠","Pensar no próximo passo",{cabeca:8},{log:`Aprovado na peneira do ${big.n}`})],{big:true}));}
   if(score>=40){FL.club=mid;
     return A(C("Técnico do "+mid.n,"📞","campo",`Seu nome não está na lista do ${big.n}. Mas um senhor de agasalho te chama no canto: “Sou do ${mid.n}. Gostei de você. Topa?”`,
       [O("🤝🏽","Topo",{cabeca:5},{log:`Reprovado no ${big.n}, aceito pelo ${mid.n}`}),O("😤",`Topo, e um dia volto pro ${big.n}`,{bola:4,cabeca:-5},{set:{vinganca:big.n},log:`Reprovado no ${big.n}, aceito pelo ${mid.n}`})]));}
   FL.club=localClub();
-  return A(C("Rodoviária","🚌","rua",`Seu nome não está na lista. A volta pra ${esc(P.cidade)} é a viagem mais longa da sua vida. Semana seguinte, o ${FL.club.n} te chama pra base.`,
+  return A(C("Rodoviária","🚌","rua",`Seu nome não está na lista. A volta pra casa é a viagem mais longa da sua vida. Semana seguinte, o ${FL.club.n} te chama pra base.`,
     [O("😞","Dar um tempo da bola",{familia:10,bola:-8},{log:`Reprovado na peneira, foi pra base do ${FL.club.n}`}),O("😤","Treinar com raiva",{bola:8,corpo:4,cabeca:-5},{log:`Reprovado na peneira, foi pra base do ${FL.club.n}`})],{bad:true}));
 }
 function penaltiBase(base){

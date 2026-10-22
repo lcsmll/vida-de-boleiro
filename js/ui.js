@@ -1,5 +1,5 @@
-import {$,C,CAL,LEVEL,LIGAS,MES,MESC,O,POS,STATS,STG,calOf,chance,esc,fmt} from "./data.js";
-import {AGE,CAR,COMP,CTAB,FEED,FL,LASTCH,LASTO,LOG,M,P,PHASE,Q,S,SEA,TAB,Y,cur,log,mv,ovr,posName,salAtual,set,year} from "./state.js";
+import {$,C,CAL,LEVEL,LIGAS,MES,MESC,O,POS,STATS,STG,calOf,chance,esc,fmt,ufNome} from "./data.js";
+import {AGE,CAR,keyStats,statName,COMP,CTAB,FEED,FL,LASTCH,LASTO,LOG,M,P,PHASE,Q,S,SEA,TAB,Y,cur,log,mv,ovr,posName,salAtual,set,year} from "./state.js";
 import {crest,scene,shirt} from "./art.js";
 import {advance,choose,ligaNome,myPos,next,offNow,pctN,role,selObj,selPais,sorted,tierOf} from "./engine.js";
 import {ACTS,FXI,applyFx,canDo,doAction,pc} from "./actions.js";
@@ -13,12 +13,12 @@ function chips(el,name,items,labelFn,def){el.innerHTML=items.map((it,i)=>{const 
   return `<input type="radio" name="${name}" id="${name}-${i}" value="${v}" ${v===def?"checked":""}><label for="${name}-${i}">${labelFn(it)}</label>`;}).join("");}
 function readForm(){const nome=$("f-nome").value.trim();
   return {nome,apelido:$("f-apelido").value.trim()||nome.split(/\s+/)[0]||"",numero:parseInt($("f-num").value,10),nasc:$("f-nasc").value,
-    pos:document.querySelector('input[name="pos"]:checked').value,pe:document.querySelector('input[name="pe"]:checked').value,uf:$("f-uf").value,cidade:$("f-cidade").value.trim()};}
+    pos:document.querySelector('input[name="pos"]:checked').value,pe:document.querySelector('input[name="pe"]:checked').value,uf:$("f-uf").value};}
 function updateShirt(){const f=readForm();
   $("c-shirt").innerHTML=shirt(null,isNaN(f.numero)?"?":f.numero,56);
   $("shirt-nick").textContent=f.apelido||"Seu apelido";
   const d=f.nasc?new Date(f.nasc+"T12:00:00"):null;
-  $("shirt-meta").textContent=`${POS.find(p=>p.id===f.pos).n}, ${f.pe.toLowerCase()}${f.cidade?" · "+f.cidade+"/"+f.uf:""}${d?` · nascido em ${d.getFullYear()}`:""}`;}
+  $("shirt-meta").textContent=`${POS.find(p=>p.id===f.pos).n}, ${f.pe.toLowerCase()}${" · "+ufNome(f.uf)}${d?` · nascido em ${d.getFullYear()}`:""}`;}
 /* ===================== Interface ===================== */
 const dchip=d=>d&&Math.round(d)?`<em class="dl ${d>0?"up":"dn"}">${d>0?"+":""}${Math.round(d)}</em>`:"";
 function renderAll(){
@@ -35,7 +35,7 @@ function renderBar(){
   const cl=FL.club;
   $("h-ava").innerHTML=shirt(cl?cl.c:null,P.numero,44);
   $("h-nick").textContent=P.apelido;
-  $("h-club").innerHTML=cl?`${crest(cl,14)}${esc(cl.n)} · ${PHASE==="pro"?role():"base"}`:`${esc(P.cidade)}/${P.uf}`;
+  $("h-club").innerHTML=cl?`${crest(cl,14)}${esc(cl.n)} · ${PHASE==="pro"?role():"base"}`:ufNome(P.uf);
   $("h-date").textContent=PHASE==="pro"?`${MESC[M]} ${Y} · ${AGE} anos`:`${year()} · ${AGE} anos`;
 }
 function attrsHtml(){
@@ -75,17 +75,17 @@ function renderHome(){
       <p class="note" style="margin:10px 0 0">⚡ ${en} de energia para ações neste mês. Energia não usada vira descanso.</p></div>
     <div class="cta"><button class="btn" id="b-adv" ${pend?"disabled":""}>${pend?"Resolva a decisão pendente":`Avançar para ${nxt} ▶`}</button></div>
     ${me?`<div class="card"><h3>Temporada ${esc(COMP.label)}<small>${esc(COMP.liga)} · rodada ${me.J}/38</small></h3>
-      <div class="minirow"><div><b>${me.J?pos+"º":"–"}</b><span>posição</span></div><div><b>${P.pos==="GOL"?SEA.l:SEA.g}</b><span>${P.pos==="GOL"?"sem gol":"gols"}</span></div><div><b>${SEA.a}</b><span>assist.</span></div><div><b>${n?n.toFixed(1):"–"}</b><span>nota</span></div></div></div>`:""}
+      <div class="minirow"><div><b>${me.J?pos+"º":"–"}</b><span>posição</span></div>${keyStats().map(k=>`<div><b>${SEA[k]||0}</b><span>${statName(k)}</span></div>`).join("")}<div><b>${n?n.toFixed(1):"–"}</b><span>nota</span></div></div></div>`:""}
     <div class="card">${attrsHtml()}</div>
     <div class="card"><h3>Últimos meses</h3>${FEED.length?`<ul class="feed">${FEED.slice(0,8).map(feedItem).join("")}</ul>`:`<p class="empty">Avance o mês para começar a temporada.</p>`}</div>`;
   const b=$("b-adv");if(b) b.onclick=advance;
 }
 function feedItem(r){
   const pl=r.matches,res=m=>m.a>m.b?"V":m.a===m.b?"E":"D";
-  const gs=pl.reduce((a,m)=>a+(m.g||0),0),as=pl.reduce((a,m)=>a+(m.as||0),0);
+  const sum=k=>pl.reduce((a,m)=>a+(m[k]||0),0),tot={g:sum("g"),a:sum("as"),l:pl.filter(m=>m.pl&&m.cs).length,df:sum("df")};
   const CP={LIG:"Liga",EST:"Est.",COPA:"Copa",CONT:"Cont.",FINAL:"Final"};
   return `<li><div class="fh"><b>${MES[r.m]} ${r.y}</b><span class="form">${pl.slice(0,8).map(m=>`<i class="${res(m)}">${res(m)}</i>`).join("")}</span></div>
-    <div class="note">${pl.length?`${pl.length} jogos · ${r.w}V ${pl.length-r.w-r.l}E ${r.l}D · ${P.pos==="GOL"?"":`${gs} gols · `}${as} assist. · nota ${r.avg?r.avg.toFixed(1):"–"}`:"Sem jogos"}</div>
+    <div class="note">${pl.length?`${pl.length} jogos · ${r.w}V ${pl.length-r.w-r.l}E ${r.l}D · ${keyStats().map(k=>`${tot[k]} ${statName(k)}`).join(" · ")} · nota ${r.avg?r.avg.toFixed(1):"–"}`:"Sem jogos"}</div>
     ${r.notes.length?`<ul class="notes">${r.notes.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:""}
     ${pl.length?`<details><summary>Ver jogos</summary><ul class="mt">${pl.map(m=>`<li><span class="cp">${CP[m.c]||m.c}</span><span>${esc(m.o)}</span><span class="sc">${m.a}–${m.b}</span>${m.pl?rtag(m.nota):'<span class="rt x">–</span>'}</li>`).join("")}</ul></details>`:""}</li>`;
 }
@@ -155,31 +155,32 @@ function renderMerc(){
   $("m-neg").onclick=()=>{FL.en--;FL.forcar=true;const ch={};applyFx({fama:-3,moral:-2},ch);set({LASTCH:ch});log(`Pediu pra ser negociado pelo ${c.n}`);
     Q.unshift(C("Diretoria","🧳","contrato",`A diretoria vai te colocar no mercado na próxima janela (${M<6?"julho":"janeiro"}). A torcida já sabe.`,[O("👍","Ok",{})],{result:true}));next();};
   $("m-ag").onclick=()=>{FL.en--;FL.agTroca=Y;const multa=FL.agente.n==="Marquinhos"?salAtual()*.3:0;
-    Q.unshift(C("Empresários","🏢","contrato",`Três caminhos pra sua carreira.${multa?` Romper com o Marquinhos custa ${fmt(multa)} de multa.`:""}`,
+    Q.unshift(C("Empresários","🏢","empresario",`Três caminhos pra sua carreira.${multa?` Romper com o Marquinhos custa ${fmt(multa)} de multa.`:""}`,
       [O("🏢","Elite Sports",{g:-multa},{sub:"12% de comissão · mais propostas e clubes maiores",set:{agente:{n:"Elite Sports",com:.12,mult:1.4}},log:"Assinou com a Elite Sports"}),
        O("🧍🏽","Me representar sozinho",{g:-multa},{sub:"0% · menos propostas",set:{agente:{n:"Sem empresário",com:0,mult:.6}}}),
        O("🤝🏽",`Manter ${FL.agente.n==="Sem empresário"?"como está":FL.agente.n}`,{},{sub:`${Math.round(FL.agente.com*100)}% de comissão`})]));next();};
 }
+const careerStat=k=>({g:CAR.gols,a:CAR.assist,l:CAR.limpas,df:CAR.def||0}[k])+(SEA&&!SEA.closed?SEA[k]||0:0);
 function histCard(){
-  const g=P.pos==="GOL";
-  return `<div class="card"><h3>Temporada a temporada</h3>${CAR.hist.length?`<div class="tw"><table><thead><tr><th>Temp.</th><th>Clube</th><th class="n">J</th><th class="n">${g?"SG":"G"}</th><th class="n">A</th><th class="n">Nota</th><th class="n">Pos</th><th class="n">🏆</th></tr></thead><tbody>${
-    CAR.hist.slice().reverse().map(x=>`<tr><td>${esc(x.y)}</td><td>${esc(x.club)}</td><td class="n">${x.j}</td><td class="n">${g?x.l:x.g}</td><td class="n">${x.a}</td><td class="n">${x.nota?rtag(x.nota):"–"}</td><td class="n">${x.pos?x.pos+"º":"–"}</td><td class="n">${x.tit||""}</td></tr>`).join("")}</tbody></table></div>`:`<p class="empty">A primeira temporada ainda está em andamento.</p>`}</div>`;
+  const [k1,k2]=keyStats();
+  return `<div class="card"><h3>Temporada a temporada</h3>${CAR.hist.length?`<div class="tw"><table><thead><tr><th>Temp.</th><th>Clube</th><th class="n">J</th><th class="n">${statName(k1,1)}</th><th class="n">${statName(k2,1)}</th><th class="n">Nota</th><th class="n">Pos</th><th class="n">🏆</th></tr></thead><tbody>${
+    CAR.hist.slice().reverse().map(x=>`<tr><td>${esc(x.y)}</td><td>${esc(x.club)}</td><td class="n">${x.j}</td><td class="n">${x[k1]??"–"}</td><td class="n">${x[k2]??"–"}</td><td class="n">${x.nota?rtag(x.nota):"–"}</td><td class="n">${x.pos?x.pos+"º":"–"}</td><td class="n">${x.tit||""}</td></tr>`).join("")}</tbody></table></div>`:`<p class="empty">A primeira temporada ainda está em andamento.</p>`}</div>`;
 }
 function renderPerf(){
   const h=$("t-perf"),chipsH=(a,em)=>a.length?a.map(([k,n])=>`<li class="${/Copa do Mundo|Bola de Ouro|Champions|Libertadores/.test(k)?"gold":""}"><b>${n}×</b>${esc(k)}</li>`).join(""):`<li class="empty" style="border:0;background:none;padding:0">${em}</li>`;
   h.innerHTML=`<div class="card">${attrsHtml()}<div class="meters"><div class="meter"><div class="lb"><span>⭐ Fama</span><b>${Math.round(CAR.fama)}</b></div><div class="bar"><i style="width:${CAR.fama}%"></i></div></div>
       <div class="meter"><div class="lb"><span>😊 Moral</span><b>${Math.round(S.moral)}</b></div><div class="bar mor"><i style="width:${S.moral}%"></i></div></div></div></div>
     <div class="card"><h3>Ficha</h3>
-      <div class="kv"><span>Nome</span><b>${esc(P.nome)}</b></div><div class="kv"><span>Nascimento</span><b>${new Date(P.nasc+"T12:00:00").toLocaleDateString("pt-BR")} · ${esc(P.cidade)}/${P.uf}</b></div>
+      <div class="kv"><span>Nome</span><b>${esc(P.nome)}</b></div><div class="kv"><span>Nascimento</span><b>${new Date(P.nasc+"T12:00:00").toLocaleDateString("pt-BR")} · ${ufNome(P.uf)}</b></div>
       <div class="kv"><span>Posição</span><b>${posName()} · ${P.pe.toLowerCase()} · camisa ${P.numero}</b></div>
       <div class="kv"><span>Seleção</span><b>${FL.selecao?`${selObj().f} ${selPais()} · ${CAR.selJogos} jogos, ${CAR.selGols} gols`:"Nunca convocado"}</b></div>
-      <div class="kv"><span>Carreira</span><b>${CAR.jogos+(SEA&&!SEA.closed?SEA.j:0)} jogos · ${P.pos==="GOL"?`${CAR.limpas+(SEA&&!SEA.closed?SEA.l:0)} sem sofrer gol`:`${CAR.gols+(SEA&&!SEA.closed?SEA.g:0)} gols`}</b></div></div>
+      <div class="kv"><span>Carreira</span><b>${CAR.jogos+(SEA&&!SEA.closed?SEA.j:0)} jogos · ${keyStats().map(k=>`${careerStat(k)} ${statName(k)}`).join(" · ")}</b></div></div>
     <div class="card"><h3>Sala de troféus<small>${CAR.titulos.length} títulos</small></h3><ul class="trophies">${chipsH(group(CAR.titulos),"Nenhum título ainda.")}</ul>
       <h3 style="margin-top:14px">Prêmios</h3><ul class="trophies">${chipsH(group(CAR.premios),"Nenhum prêmio ainda.")}</ul></div>
     ${histCard()}
     <div class="card"><h3>Diário</h3><ol class="timeline">${LOG.slice().reverse().slice(0,40).map(l=>`<li><b>${l.y}</b><span>${esc(l.t)}</span></li>`).join("")}</ol></div>
     <div class="stack"><button class="btn ghost wide" id="p-ret" ${AGE>=30&&!cur?"":"disabled"}>👟 Encerrar a carreira</button></div>`;
-  $("p-ret").onclick=()=>{if(AGE>=30) {Q.unshift(C("Aposentadoria","👟","estadio",`Tem certeza? Não dá pra voltar atrás.`,[O("👟","Pendurar as chuteiras",{},{end:"aposentou"}),O("⚽","Ainda não",{})]));next();}};
+  $("p-ret").onclick=()=>{if(AGE>=30) {Q.unshift(C("Aposentadoria","👟","aposentadoria",`Tem certeza? Não dá pra voltar atrás.`,[O("👟","Pendurar as chuteiras",{},{end:"aposentou"}),O("⚽","Ainda não",{})]));next();}};
 }
 function renderSheet(){
   const w=$("sheet"),inn=$("sheet-in");
@@ -200,4 +201,4 @@ function renderSheet(){
   if(inn.getBoundingClientRect().top<0) w.scrollIntoView({block:"start"});
 }
 
-export {show,chips,readForm,updateShirt,renderAll,renderBar,attrsHtml,agenda,renderHome,feedItem,renderActs,renderComp,spark,renderMerc,histCard,renderPerf,renderSheet,rc,rtag,dchip};
+export {careerStat,show,chips,readForm,updateShirt,renderAll,renderBar,attrsHtml,agenda,renderHome,feedItem,renderActs,renderComp,spark,renderMerc,histCard,renderPerf,renderSheet,rc,rtag,dchip};

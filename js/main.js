@@ -1,5 +1,5 @@
-import {$,C,DEFAULT_CLUBS,LIGAS,MES,O,PES,POS,STATS,UFS,chance,clamp,esc,fmt,rand} from "./data.js";
-import {AGE,BM,BY,CAR,CLUBS,COMP,FEED,FL,LOG,M,P,PHASE,POT,S,SEA,USED,WORLD,Y,cur,log,ovr,posName,potStars,set} from "./state.js";
+import {$,C,DEFAULT_CLUBS,LIGAS,MES,O,PES,POS,STATS,UFS,chance,clamp,esc,fmt,rand,ufNome} from "./data.js";
+import {AGE,BM,BY,CAR,keyStats,statName,CLUBS,COMP,FEED,FL,LOG,M,P,PHASE,POT,S,SEA,USED,WORLD,Y,cur,log,ovr,posName,potStars,set} from "./state.js";
 import {ART,crest,shirtBack} from "./art.js";
 import {prologue} from "./prologue.js";
 import {choose,closeSeason,myPos,next,selObj} from "./engine.js";
@@ -8,7 +8,7 @@ import {chips,histCard,readForm,renderAll,show,updateShirt} from "./ui.js";
 chips($("c-pos"),"pos",POS,p=>p.n,"MEI");chips($("c-pe"),"pe",PES,p=>p,"Destro");
 $("f-uf").innerHTML=UFS.map(([s,n])=>`<option value="${s}" ${s==="MG"?"selected":""}>${n}</option>`).join("");
 document.querySelectorAll("#s-create input, #s-create select").forEach(el=>el.addEventListener("input",updateShirt));
-try{const s=JSON.parse(localStorage.getItem("vb-jogador")||"null");if(s){$("f-nome").value=s.nome;$("f-apelido").value=s.apelido;$("f-num").value=s.numero;$("f-cidade").value=s.cidade;$("f-uf").value=s.uf;if(s.nasc)$("f-nasc").value=s.nasc;
+try{const s=JSON.parse(localStorage.getItem("vb-jogador")||"null");if(s){$("f-nome").value=s.nome;$("f-apelido").value=s.apelido;$("f-num").value=s.numero;$("f-uf").value=s.uf;if(s.nasc)$("f-nasc").value=s.nasc;
   document.querySelector(`input[name="pos"][value="${s.pos}"]`).checked=true;document.querySelector(`input[name="pe"][value="${s.pe}"]`).checked=true;}}catch(e){}
 updateShirt();
 document.querySelectorAll("#bnav button").forEach(b=>b.onclick=()=>{set({TAB:b.dataset.tab});renderAll();window.scrollTo(0,0);});
@@ -37,7 +37,7 @@ function startGame(){
   set({POT:Math.round(clamp((rand(58,96)+rand(58,96))/2+(chance(.06)?8:0),58,98))});
   set({FL:{g:0,en:4,acts:{}},AGE:7,PHASE:"pre",USED:new Set(),WORLD:null,COMP:null,SEA:null,LASTCH:null,LASTO:null,FEED:[],TAB:"home"});
   set({CAR:{jogos:0,gols:0,assist:0,limpas:0,titulos:[],premios:[],clubes:[],selJogos:0,selGols:0,peak:0,fama:0,mvMax:0,salMax:0,ganhos:0,maiorTransf:0,hist:[],mvHist:[]}});
-  set({LOG:[{age:0,y:BY,t:`Nasceu em ${d.toLocaleDateString("pt-BR")}, em ${P.cidade}/${P.uf}`}]});
+  set({LOG:[{age:0,y:BY,t:`Nasceu em ${d.toLocaleDateString("pt-BR")}, em ${ufNome(P.uf)}`}]});
   FL.potTxt=potStars();
   try{localStorage.removeItem("vb-save");}catch(e){}
   set({Q:prologue()});show("s-game");next();
@@ -56,8 +56,8 @@ function legacy(){
   const W=t=>t.startsWith("Copa do Mundo")?50:t.startsWith("Champions")?25:t.startsWith("Libertadores")?18:/^(Copa América|Eurocopa)/.test(t)?14:
     t.startsWith("Estadual")?2:t.includes("Sub-17")?1:t.startsWith("Série B")?3:/^(Liga|Brasileirão)/.test(t)?(t.startsWith("Brasileirão")?10:/Saudita|Americana|Japonesa/.test(t)?4:12):5;
   let pts=CAR.titulos.reduce((a,t)=>a+W(t),0);
-  CAR.premios.forEach(p=>pts+=p.startsWith("Bola de Ouro")?45:/^(Craque|Artilheiro|Luva)/.test(p)?6:/^Rei/.test(p)?5:/^Revela/.test(p)?3:2);
-  pts+=CAR.selJogos*.3+CAR.gols*.05+CAR.limpas*.1+Math.max(0,CAR.peak-76)*1.8;
+  CAR.premios.forEach(p=>pts+=p.startsWith("Bola de Ouro")?45:/^(Craque|Artilheiro|Luva|Melhor)/.test(p)?6:/^Rei/.test(p)?5:/^Revela/.test(p)?3:2);
+  pts+=CAR.selJogos*.3+CAR.gols*.05+CAR.limpas*({GOL:.1,ZAG:.04}[P.pos]||.02)+(CAR.def||0)*.004+Math.max(0,CAR.peak-76)*1.8;
   return pts;
 }
 function verdict(reason){
@@ -67,9 +67,9 @@ function verdict(reason){
   if(pts>=190) return ["Ídolo","lenda","Estátua na porta do estádio e camisa aposentada."];
   if(POT>=84&&CAR.peak<=POT-8&&pts<130) return ["Flopado","flop",`Tinha potencial pra ser o melhor do mundo. Virou meme de “promessa que não vingou”.`];
   if(pts>=95) return ["Craque","","Ganhou o que tinha pra ganhar e deixou saudade."];
-  if(FL.promessa&&(CAR.peak<74||pts<35)) return ["Flopado","flop","Era pra ser o novo fenômeno. Ficou no “quase”."];
+  if(FL.promessa&&CAR.peak<POT-2&&(CAR.peak<74||pts<35)) return ["Flopado","flop","Era pra ser o novo fenômeno. Ficou no “quase”."];
   if(pts>=32) return ["Boleiro","","Carreira honesta. Pagou as contas e encheu o bairro de orgulho."];
-  return ["Esquecido","flop",`Pouca gente lembra. Mas em ${P.cidade}, todo mundo conhece.`];
+  return ["Esquecido","flop",`Pouca gente lembra. Mas no bairro onde cresceu, todo mundo conhece.`];
 }
 
 const group=a=>{const m={};a.forEach(t=>{const k=t.replace(/ \d{4}(\/\d{2})?$/,"");m[k]=(m[k]||0)+1;});return Object.entries(m).sort((x,y)=>y[1]-x[1]);};
@@ -86,12 +86,12 @@ function finish(reason){
   END={v,cls,why,r};
   $("e-reason").textContent=r;$("e-verdict").textContent=v;$("e-verdict").className="verdict "+cls;$("e-why").textContent=why;
   $("e-pot").textContent=`Potencial real: ${POT} · Auge: ${CAR.peak}`;
-  const g=P.pos==="GOL",best=group(CAR.clubes)[0];
+  const [K1,K2]=keyStats(),cs=k=>({g:CAR.gols,a:CAR.assist,l:CAR.limpas,df:CAR.def||0}[k]),best=group(CAR.clubes)[0];
   const mainClub=(best&&CLUBS.find(c=>c.n===best[0]))||FL.club||{c:["#2448E8","#fff"]};
   END.club=mainClub;
   renderFig();
   $("e-nums").innerHTML=[[fmt(CAR.mvMax),"maior valor de mercado"],[fmt(CAR.salMax),"maior salário anual"],[CAR.maiorTransf?fmt(CAR.maiorTransf):"—","maior transferência"],[fmt(CAR.ganhos),"ganhou na carreira"],
-    [`${CAR.selJogos} / ${CAR.selGols}`,`jogos / gols pela seleção${FL.selPais?" ("+FL.selPais+")":""}`],[g?CAR.limpas:CAR.assist,g?"jogos sem sofrer gol":"assistências"]]
+    [`${CAR.selJogos} / ${CAR.selGols}`,`jogos / gols pela seleção${FL.selPais?" ("+FL.selPais+")":""}`],[`${CAR[K2]||0}`,K2==="l"?"jogos sem sofrer gol":statName(K2).replace("assist.","assistências")]]
     .map(([b,s])=>`<div><b>${b}</b><span>${s}</span></div>`).join("");
   const chipsHtml=(a,empty)=>a.length?a.map(([k,n])=>`<li class="${/Copa do Mundo|Bola de Ouro|Champions|Libertadores/.test(k)?"gold":""}"><b>${n}×</b>${esc(k)}</li>`).join(""):`<li class="empty" style="border:0;background:none;padding:0">${empty}</li>`;
   $("e-tit").innerHTML=chipsHtml(group(CAR.titulos),"Nenhum título.");
@@ -100,7 +100,7 @@ function finish(reason){
   $("e-hist").innerHTML=histCard().replace(/^<div class="card"><h3>Temporada a temporada<\/h3>/,"").replace(/<\/div>$/,"");
   $("e-time").innerHTML=LOG.map(l=>`<li><b>${l.y}</b><span>${esc(l.t)}</span></li>`).join("");
   END.txt=`${P.apelido} (${posName()}, camisa ${P.numero}) — ${v.toUpperCase()}\n${r}\nPotencial ${POT} · auge ${CAR.peak}\n`+
-    `${CAR.jogos} jogos, ${g?CAR.limpas+" sem sofrer gol":CAR.gols+" gols"}, ${CAR.titulos.length} títulos, ${CAR.selJogos} jogos pela seleção\nMaior valor de mercado: ${fmt(CAR.mvMax)}\n`+
+    `${CAR.jogos} jogos, ${cs(K1)} ${statName(K1)}, ${cs(K2)} ${statName(K2)}, ${CAR.titulos.length} títulos, ${CAR.selJogos} jogos pela seleção\nMaior valor de mercado: ${fmt(CAR.mvMax)}\n`+
     `Clubes: ${CAR.clubes.join(" → ")||"—"}\n`+group(CAR.titulos.concat(CAR.premios)).slice(0,8).map(([k,n])=>`${n}× ${k}`).join(" | ")+`\n#VidaDeBoleiro`;
   $("e-msg").textContent="";
   show("s-end");
@@ -112,7 +112,7 @@ const ovrColor=o=>o>=88?"#1C5DFF":o>=82?"#12A150":o>=76?"#7AB800":o>=70?"#D9A400
 let FIGMODE="carta";
 try{FIGMODE=localStorage.getItem("vb-fig")||"carta";}catch(e){}
 function renderFig(){
-  const mc=END.club,g=P.pos==="GOL",flag=FL.selPais?selObj().f:"🇧🇷",pro=CAR.clubes.length>0;
+  const mc=END.club,[K1]=keyStats(),k1=({g:CAR.gols,a:CAR.assist,l:CAR.limpas,df:CAR.def||0})[K1],l1=K1==="l"?"sem gol":statName(K1),flag=FL.selPais?selObj().f:"🇧🇷",pro=CAR.clubes.length>0;
   const light=/^#(f|e|d)/i.test(mc.c[0]),band=light?mc.c[1]:mc.c[0];
   const jersey=shirtBack(mc.c,P.apelido,P.numero);
   document.querySelectorAll("#e-figmode button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.m===FIGMODE));
@@ -123,12 +123,12 @@ function renderFig(){
         <span class="stk-n">${P.numero}</span><span class="stk-flag" aria-hidden="true">${flag}</span>
         ${pro?`<span class="stk-crest">${crest(mc,30)}</span>`:""}<div class="stk-j">${jersey}</div></div>
       <div class="stk-band"><div class="stk-nick">${esc(P.apelido)}</div><div class="stk-full">${esc(P.nome)}</div></div>
-      <div class="stk-info"><span>${posName()}</span><span>${nasc}</span><span>${esc(P.cidade)}/${P.uf}</span></div>
-      <div class="stk-foot"><span>Auge <b>${CAR.peak}</b></span><span><b>${CAR.jogos}</b> jogos</span><span><b>${g?CAR.limpas:CAR.gols}</b> ${g?"sem gol":"gols"}</span><span><b>${CAR.titulos.length}</b> títulos</span></div>
+      <div class="stk-info"><span>${posName()}</span><span>${nasc}</span><span>${ufNome(P.uf)}</span></div>
+      <div class="stk-foot"><span>Auge <b>${CAR.peak}</b></span><span><b>${CAR.jogos}</b> jogos</span><span><b>${k1}</b> ${l1}</span><span><b>${CAR.titulos.length}</b> títulos</span></div>
     </div>`;
     return;}
   const anos=pro&&Y>BY+17?`${BY+17}–${Y}`:pro?String(Y):"Só na base";
-  const nums=[[CAR.jogos,"jogos"],[g?CAR.limpas:CAR.gols,g?"sem gol":"gols"],[CAR.titulos.length,"títulos"],[CAR.selJogos,"seleção"]];
+  const nums=[[CAR.jogos,"jogos"],[k1,l1],[CAR.titulos.length,"títulos"],[CAR.selJogos,"seleção"]];
   $("e-fig").innerHTML=`<div class="vb t-${TIER[END.v]||"boleiro"}">
     <div class="vb-top"><span class="vb-brand">⚽ Vida de Boleiro</span><span class="vb-yr">${anos}</span></div>
     <div class="vb-hero">
@@ -137,7 +137,7 @@ function renderFig(){
       <div class="vb-j">${jersey}</div>
     </div>
     <div class="vb-id"><div class="vb-nick">${esc(P.apelido)}</div>
-      <div class="vb-meta"><span class="vb-pos">${P.pos}</span>${esc(P.nome)} · ${esc(P.cidade)}/${P.uf}</div></div>
+      <div class="vb-meta"><span class="vb-pos">${P.pos}</span>${esc(P.nome)} · ${ufNome(P.uf)}</div></div>
     <div class="vb-attrs">${STATS.map(t=>{const v=Math.round(S[t.k]);return `<div><span>${t.ic} ${t.n}</span><i><em style="width:${v}%"></em></i><b>${v}</b></div>`;}).join("")}</div>
     <div class="vb-nums">${nums.map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join("")}</div>
     <div class="vb-verd"><span>${END.v}</span></div>
@@ -174,7 +174,7 @@ $("b-start").onclick=()=>show("s-create");
 $("b-back1").onclick=()=>{refreshContinue();show("s-intro");};
 $("b-continue").onclick=()=>{if(!loadGame()) $("b-continue").hidden=true;};
 $("b-go").onclick=()=>{const f=readForm();
-  const err=!f.nome?"Coloca seu nome.":(isNaN(f.numero)||f.numero<1||f.numero>99)?"A camisa vai de 1 a 99.":!f.nasc?"Escolha a data de nascimento.":!f.cidade?"Diz a cidade onde você nasceu.":"";
+  const err=!f.nome?"Coloca seu nome.":(isNaN(f.numero)||f.numero<1||f.numero>99)?"A camisa vai de 1 a 99.":!f.nasc?"Escolha a data de nascimento.":"";
   $("f-err").textContent=err;if(err) return;set({P:f});try{localStorage.setItem("vb-jogador",JSON.stringify(P));}catch(e){}startGame();};
 $("b-again").onclick=startGame;$("b-new").onclick=()=>show("s-create");
 $("b-copy").onclick=async()=>{try{await navigator.clipboard.writeText(END.txt);$("e-msg").textContent="Resumo copiado.";}catch(e){$("e-msg").textContent="Este navegador bloqueou a cópia.";}};

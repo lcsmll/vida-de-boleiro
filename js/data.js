@@ -101,4 +101,5 @@ const CAL={
 const KSEQ=["Oitavas","Quartas","Semifinal","Final"];
 const calOf=c=>["BR","ARG","USA","JPN"].includes(c.l)?"BR":"EU";
 
-export {C,$,rand,chance,pick,clamp,poisson,esc,UFS,POS,PES,STATS,LIGAS,DEFAULT_CLUBS,SEL,LEVEL,REG,MES,MESC,fmt,O,FILLP,NAMES,LANG,COLS,STG,fase,CAL,KSEQ,calOf};
+const ufNome=uf=>(UFS.find(u=>u[0]===uf)||[uf,uf])[1];
+export {ufNome,C,$,rand,chance,pick,clamp,poisson,esc,UFS,POS,PES,STATS,LIGAS,DEFAULT_CLUBS,SEL,LEVEL,REG,MES,MESC,fmt,O,FILLP,NAMES,LANG,COLS,STG,fase,CAL,KSEQ,calOf};

@@ -5,12 +5,12 @@ import {next} from "./engine.js";
 /* ===================== Ações com probabilidade ===================== */
 const pc=v=>clamp(v,.02,.98);
 const ACTS=[
-  {id:"treino",grp:"Carreira",ic:"🏋🏽",n:"Treino extra",d:"Ficar depois do treino com o preparador.",en:2,lim:2,scene:"campo",fx:{fad:12},
+  {id:"treino",grp:"Carreira",ic:"🏋🏽",n:"Treino extra",d:"Ficar depois do treino com o preparador.",en:2,lim:2,scene:"academia",fx:{fad:12},
     outs:()=>[{p:pc(.8-(S.bola>=POT+5?.6:0)),t:"Evoluiu tecnicamente",fx:{bola:1.5}},{p:.3,t:"Ganhou condicionamento",fx:{corpo:1}},
       {p:pc(.04+S.fad/400),t:"Lesão leve no treino",bad:1,fx:{},run:()=>{FL.lesao=Math.max(FL.lesao||0,1);log("Lesão leve em treino extra");}}]},
   {id:"video",grp:"Carreira",ic:"📺",n:"Estudar os adversários",d:"Vídeos com o analista de desempenho.",en:1,lim:1,scene:"imprensa",fx:{},
     outs:()=>[{p:.9,t:"Leitura de jogo melhor",fx:{cabeca:1.5}},{p:.5,t:"Confiança pro próximo mês",fx:{moral:4},run:()=>{FL.mod=(FL.mod||0)+1;FL.modM=Math.max(FL.modM||0,1);}}]},
-  {id:"tecnico",grp:"Carreira",ic:"🗣️",n:"Conversar com o técnico",d:"Pedir mais minutos ou liberdade em campo.",en:1,lim:1,scene:"vestiario",fx:{},
+  {id:"tecnico",grp:"Carreira",ic:"🗣️",n:"Conversar com o técnico",d:"Pedir mais minutos ou liberdade em campo.",en:1,lim:1,scene:"tecnico",fx:{},
     outs:()=>[{p:pc(.35+(S.cabeca-50)/150),t:"Ele te deu mais espaço",fx:{moral:6},run:()=>{FL.mod=(FL.mod||0)+3;FL.modM=Math.max(FL.modM||0,2);}},
       {p:pc(.2-(S.cabeca-50)/250),t:"Ele não gostou da cobrança",bad:1,fx:{moral:-6,cabeca:-2}}]},
   {id:"festa",grp:"Vida social",ic:"🎉",n:"Ir a uma festa",d:"Camarote, DJ e muitas fotos.",en:2,lim:3,scene:"festa",fx:{moral:6},

@@ -85,7 +85,8 @@ function scene(k){
   carro:`${SKY("#cbd5e1","#f1f5f9")}<rect y="120" width="400" height="40" fill="#475569"/><path d="M80 112 L120 80 H250 L300 108 L330 112 V130 H80Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="3"/><path d="M130 86 H180 V106 H112Z M190 86 H246 L276 106 H190Z" fill="#bfdbfe"/>
     <circle cx="130" cy="132" r="16" fill="#111"/><circle cx="130" cy="132" r="7" fill="#9ca3af"/><circle cx="280" cy="132" r="16" fill="#111"/><circle cx="280" cy="132" r="7" fill="#9ca3af"/>`
   };
-  const a=ART[artKey(k)];
+  const a=ART[artKey(k)]||ART[artKey(RESERVA[k]||"")];
+  if(!a&&RESERVA[k]) k=RESERVA[k];
   return a?`<img class="ill" src="${a}" alt="">`:`<svg class="ill" viewBox="0 0 400 160" role="img" aria-hidden="true">${S[k]||S.campo}</svg>`;
 }
 
@@ -97,6 +98,8 @@ const ART=Object.fromEntries(["rua","sinal","escola","estadio","hospital","impre
 const RICO=3e5;
 const VARS={campo:["campo_terra","campo_ct"],vestiario:["vestiario_base","vestiario_pro"],festa:["festa_base","festa_pro"],
   casa:["casa_simples","casa_rica",1],contrato:["contrato_simples","contrato_flash",1]};
+// Cenas novas ainda sem arte usam a cena mais parecida até a imagem existir em ART
+const RESERVA={tecnico:"vestiario",empresario:"contrato",torcida:"rua",bebe:"casa",peneira:"campo",penalti:"estadio",aposentadoria:"estadio",academia:"campo",defesa:"estadio"};
 const artKey=k=>{const v=VARS[k];if(!v) return k;return v[PHASE!=="pre"&&(!v[2]||salAtual()>RICO)?1:0];};
 
-export {hash,crest,shirt,shirtBack,scene,SKY,CROWD,FIELD,ART,RICO,VARS,artKey};
+export {RESERVA,hash,crest,shirt,shirtBack,scene,SKY,CROWD,FIELD,ART,RICO,VARS,artKey};

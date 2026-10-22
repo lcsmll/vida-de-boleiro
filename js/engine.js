@@ -1,5 +1,5 @@
 import {C,CAL,COLS,FILLP,KSEQ,LANG,LEVEL,LIGAS,MESC,NAMES,O,SEL,STATS,STG,UFS,calOf,chance,clamp,esc,fase,fmt,pick,poisson,rand} from "./data.js";
-import {AGE,BM,BY,CAR,CLUBS,COMP,FEED,FL,M,P,PHASE,POT,Q,REP,S,SEA,WORLD,Y,busy,cur,log,mv,ovr,posName,potStars,salAtual,set,year} from "./state.js";
+import {AGE,BM,BY,CAR,DEFP,keyStats,statName,CLUBS,COMP,FEED,FL,M,P,PHASE,POT,Q,REP,S,SEA,WORLD,Y,busy,cur,log,mv,ovr,posName,potStars,salAtual,set,year} from "./state.js";
 import {crest} from "./art.js";
 import {midClub} from "./prologue.js";
 import {KM,drawEvents,lesaoCard} from "./events.js";
@@ -106,10 +106,12 @@ function initSeason(){
     cont:fresh&&LIGAS[c.l].cont&&FL.contQual&&lk!=="BR2"?{pts:0,g:0,st:"Grupos",alive:true,lines:[],grp:null}:null,
     nome:{copa:LIGAS[c.l].copa,cont:LIGAS[c.l].cont},trans:!fresh}});
   if(!fresh){let n=0;for(let i=0;i<off;i++) n+=cal.rounds[i];simRounds(n,false);}
-  set({SEA:{j:0,g:0,a:0,l:0,ns:0,nn:0,tit:[],pre:[],label:COMP.label,club:c.n}});
+  set({SEA:{j:0,g:0,a:0,l:0,df:0,ns:0,nn:0,tit:[],pre:[],label:COMP.label,club:c.n}});
 }
 function share(){if(FL.lesao) return 0;const d=ovr()+(FL.mod||0)-LEVEL[tierOf(FL.club)];return (d>=0?.93:d>=-6?.55:.18)*(S.fad>80?.8:1);}
 function role(){if(FL.lesao) return "Lesionado";const d=ovr()-LEVEL[tierOf(FL.club)];return d>=0?"Titular":d>=-6?"Rotação":"Reserva";}
+function dfRate(){return {GOL:3,ZAG:2.2,VOL:2.4,LAT:1.6,MEI:.9,PON:.5,ATA:.3}[P.pos]*(ovr()/80);}
+const CSB={GOL:.3,ZAG:.3,LAT:.2,VOL:.15};
 function arRate(){return {ATA:.12,PON:.22,MEI:.27,VOL:.1,LAT:.13,ZAG:.03,GOL:.01}[P.pos]*(ovr()/80);}
 function form(){return (FL.mod||0)-Math.max(0,S.fad-55)/9+(S.moral-50)/22;}
 function myStr(){const c=FL.club,t=COMP.tab.find(x=>x.n===c.n),base=t?t.r:LEVEL[tierOf(c)];return base+(ovr()+form()-LEVEL[tierOf(c)])*.35*Math.max(share(),.15);}
@@ -117,10 +119,11 @@ function playMe(opp,comp,liga){
   const [a,b]=match(myStr()+1,opp.r);let rec={c:comp,o:opp.n,a,b,pl:false};
   if(chance(share())){SEA.j++;const f=1+form()*.04;
     const g=Math.min(a,poisson(golRate()*f*1.05)),as=Math.min(a-g,poisson(arRate()*f));
-    SEA.g+=g;SEA.a+=as;if(liga){COMP.meS.g+=g;COMP.meS.a+=as;}
-    if(P.pos==="GOL"&&b===0) SEA.l++;
-    const nota=clamp(6.4+(ovr()-opp.r)/14+g*.7+as*.35+(a>b?.3:a<b?-.35:0)-(["GOL","ZAG","LAT","VOL"].includes(P.pos)?b*.15:0)-Math.max(0,S.fad-65)/40+rand(-.5,.5),4.5,10);
-    SEA.ns+=nota;SEA.nn++;Object.assign(rec,{pl:true,g,as,nota});}
+    // Defesas (goleiro) e desarmes contam na nota como os gols contam pro atacante
+    const df=poisson(dfRate()*f*clamp(1+(opp.r-myStr())/40,.7,1.4)),dp=DEFP.includes(P.pos),cs=dp&&b===0;
+    SEA.g+=g;SEA.a+=as;SEA.df=(SEA.df||0)+df;if(cs) SEA.l++;if(liga){COMP.meS.g+=g;COMP.meS.a+=as;}
+    const nota=clamp(6.4+(ovr()-opp.r)/14+g*.7+as*.35+df*.04+(cs?CSB[P.pos]:0)+(a>b?.3:a<b?-.35:0)-(dp?b*.15:0)-Math.max(0,S.fad-65)/40+rand(-.5,.5),4.5,10);
+    SEA.ns+=nota;SEA.nn++;Object.assign(rec,{pl:true,g,as,df,cs,nota});}
   if(REP) REP.matches.push(rec);
   return [a,b];
 }
@@ -180,8 +183,9 @@ function playMonth(){
 }
 function agingDrift(){
   const capB=POT+8;
-  if(AGE<=25) S.bola=Math.min(capB,clamp(S.bola+rand(0,2.5))); else if(AGE>=31) S.bola=clamp(S.bola-rand(1,3));
-  if(AGE<=23) S.corpo=clamp(S.corpo+rand(1,3)); else if(AGE<=28) S.corpo=clamp(S.corpo+rand(0,2)); else S.corpo=clamp(S.corpo-rand(1,3));
+  const v=P.pos==="GOL"?2:0;
+  if(AGE<=25) S.bola=Math.min(capB,clamp(S.bola+rand(0,2.5))); else if(AGE>=31+v) S.bola=clamp(S.bola-rand(1,3));
+  if(AGE<=23) S.corpo=clamp(S.corpo+rand(1,3)); else if(AGE<=28+v) S.corpo=clamp(S.corpo+rand(0,2)); else S.corpo=clamp(S.corpo-rand(1.5,3.5));
   if(FL.club&&["SAU","USA"].includes(FL.club.l)) S.bola=clamp(S.bola-1.5);
   if(AGE>=24) S.cabeca=clamp(S.cabeca+.5);
   S.familia=clamp(S.familia+1.5);
@@ -195,7 +199,7 @@ function birthdayCard(){
 }
 function preseason(){
   const lux=salAtual()>3e6;
-  return C(`Pré-temporada ${FL.club?seasonLabelNext():""}`,"🗓️","campo",`Últimas semanas antes da nova temporada no ${esc(FL.club.n)}. Como você se prepara?`,
+  return C(`Pré-temporada ${FL.club?seasonLabelNext():""}`,"🗓️","academia",`Últimas semanas antes da nova temporada no ${esc(FL.club.n)}. Como você se prepara?`,
     [O("🏋🏽","Treino pesado particular",{bola:3,corpo:3,familia:-5,fad:12},{sub:"Mais evolução, risco de lesão",then:()=>chance(.12)?lesaoCard():null}),
      O("🧠","Psicólogo e estudo tático",{cabeca:6,bola:1},{sub:"Cabeça no lugar"}),
      O(lux?"🛥️":"🏖️",lux?"Férias de iate em Ibiza":"Férias com a família",lux?{familia:4,fama:4,corpo:-3,cabeca:-3,moral:8,sal:-.05,fad:-20}:{familia:8,corpo:2,moral:6,fad:-25},{sub:lux?"Fotos em todo lugar":"Recarregar"})]);
@@ -203,7 +207,7 @@ function preseason(){
 function seasonLabelNext(){const c=FL.club;return calOf(c)==="BR"?String(Y):(M>=7?`${Y}/${String(Y+1).slice(2)}`:`${Y}/${String(Y+1).slice(2)}`);}
 function monthStart(){
   FL.en=FL.lesao?3:4;FL.acts={};
-  if(M===BM&&FL.bday!==Y){FL.bday=Y;set({AGE:Y-BY});agingDrift();Q.push(birthdayCard);}
+  if(M===BM&&FL.bday!==Y){FL.bday=Y;set({AGE:Y-BY});agingDrift();if([18,21,25,30,35].includes(AGE)||chance(.25)) Q.push(birthdayCard);}
   const c=FL.club,off=offNow(c);
   if((!COMP||COMP.ended)&&off===0) initSeason();
   if(off===(calOf(c)==="BR"?0:11)) Q.push(preseason);
@@ -211,7 +215,7 @@ function monthStart(){
   if(M===5) Q.push(selTournamentW);
   if(M===2||M===8) Q.push(selecaoCheck);
   if(chance(.4)) Q.push(...drawEvents(1));
-  if(COMP&&!COMP.ended&&!FL.modM&&chance(.22)) Q.push(keyMoment);
+  if(COMP&&!COMP.ended&&!FL.modM&&chance(.18)) Q.push(keyMoment);
 }
 function advance(){
   if(cur||busy) return;
@@ -227,9 +231,9 @@ function advance(){
   if(S.moral>50) S.cabeca=clamp(S.cabeca+.3);
   S.moral=clamp(S.moral+w*1.5-l*2+(avg?(avg-6.6)*3:0)+(S.familia<30?-3:0)+(50-S.moral)*.08);
   if(FL.lesao){FL.lesao--;if(!FL.lesao){REP.notes.push("✅ Liberado pelo departamento médico");log("Voltou de lesão");}}
-  else if(pl.length){const p=.01+Math.max(0,S.fad-60)/300+Math.max(0,45-S.corpo)/300+(AGE>30?.01:0);
-    if(chance(p)){const sev=pick([1,1,1,2,2,3,6]);FL.lesao=sev;S.corpo=clamp(S.corpo-(sev>=3?2:0));REP.notes.push(`🚑 Lesão: ${sev} ${sev>1?"meses":"mês"} fora`);log(`Lesionado por ${sev} ${sev>1?"meses":"mês"}`);
-      if(sev>=6) Q.unshift(lesaoCard);}}
+  else if(pl.length){const p=.018+Math.max(0,S.fad-60)/300+Math.max(0,45-S.corpo)/300+(AGE>30?.01:0);
+    if(chance(p)){const sev=pick([1,1,1,2,2,3,6]);FL.lesao=sev;S.corpo=clamp(S.corpo-sev*1.5);REP.notes.push(`🚑 Lesão: ${sev} ${sev>1?"meses":"mês"} fora`);log(`Lesionado por ${sev} ${sev>1?"meses":"mês"}`);
+      if(sev>=3) Q.unshift(lesaoCard);}}
   const s=salAtual(),liq=(s*(1-FL.agente.com)-FL.gastos)/12;FL.g+=liq;CAR.ganhos+=s/12;CAR.salMax=Math.max(CAR.salMax,s);
   if(FL.modM){FL.modM--;if(!FL.modM) FL.mod=0;}
   CAR.peak=Math.max(CAR.peak,ovr());CAR.mvMax=Math.max(CAR.mvMax,mv());
@@ -281,7 +285,9 @@ function seasonEnd(){
   const rv=COMP.sc.filter(s=>!s.me),rivG=Math.max(0,...rv.map(s=>s.g)),rivA=Math.max(0,...rv.map(s=>s.a));
   if(COMP.meS.g>0&&COMP.meS.g>=rivG) pre.push(`Artilheiro ${de(lg)} ${lab}`);
   if(COMP.meS.a>=5&&COMP.meS.a>=rivA) pre.push(`Rei das assistências ${de(lg)} ${lab}`);
-  if(P.pos==="GOL"&&SEA.l>=14&&pos<=3) pre.push(`Luva de Ouro ${de(lg)} ${lab}`);
+  if(P.pos==="GOL"&&SEA.l>=15&&pos<=2) pre.push(`Luva de Ouro ${de(lg)} ${lab}`);
+  const xer={ZAG:"Melhor zagueiro",LAT:"Melhor lateral",VOL:"Melhor volante"}[P.pos];
+  if(xer&&SEA.j>=24&&nota>=7.2&&pos<=4&&(SEA.df||0)>=SEA.j*1.6&&chance(.6)) pre.push(`${xer} ${de(lg)} ${lab}`);
   if(nota>=7.5&&pos<=4&&SEA.j>=25&&chance(.55)) pre.push(`Craque ${de(lg)} ${lab}`);
   else if(nota>=7.1&&SEA.j>=20) pre.push(`Seleção ${de(lg)} ${lab}`);
   if(AGE<=21&&nota>=7&&SEA.j>=18) pre.push(`Revelação ${de(lg)} ${lab}`);
@@ -307,18 +313,18 @@ function seasonEnd(){
      <p class="small">Valor de mercado: ${fmt(mv())}</p>`,
     [O("➡️","Seguir",{})],{big:bola||SEA.tit.length>0});
 }
-function seasonBox(){const gk=P.pos==="GOL",n=pctN();
-  return `<div class="sea"><div><b>${SEA.j}</b>jogos</div><div><b>${gk?SEA.l:SEA.g}</b>${gk?"sem sofrer gol":"gols"}</div><div><b>${SEA.a}</b>assist.</div><div><b>${n?n.toFixed(1):"–"}</b>nota média</div><div><b>${ovr()}</b>overall</div><div><b>${role()}</b>&nbsp;</div></div>`;}
+function seasonBox(){const n=pctN(),[k1,k2]=keyStats();
+  return `<div class="sea"><div><b>${SEA.j}</b>jogos</div><div><b>${SEA[k1]||0}</b>${statName(k1)}</div><div><b>${SEA[k2]||0}</b>${statName(k2)}</div><div><b>${n?n.toFixed(1):"–"}</b>nota média</div><div><b>${ovr()}</b>overall</div><div><b>${role()}</b>&nbsp;</div></div>`;}
 function closeSeason(pos,club){
   if(!SEA||SEA.closed) return;SEA.closed=true;
-  CAR.jogos+=SEA.j;CAR.gols+=SEA.g;CAR.assist+=SEA.a;CAR.limpas+=SEA.l;
-  if(SEA.j||SEA.tit.length) CAR.hist.push({y:SEA.label,club:club||SEA.club,j:SEA.j,g:SEA.g,a:SEA.a,l:SEA.l,nota:pctN(),pos:pos||0,tit:SEA.tit.length});
+  CAR.jogos+=SEA.j;CAR.gols+=SEA.g;CAR.assist+=SEA.a;CAR.limpas+=SEA.l;CAR.def=(CAR.def||0)+(SEA.df||0);
+  if(SEA.j||SEA.tit.length) CAR.hist.push({y:SEA.label,club:club||SEA.club,j:SEA.j,g:SEA.g,a:SEA.a,l:SEA.l,df:SEA.df||0,nota:pctN(),pos:pos||0,tit:SEA.tit.length});
 }
 
 function retireCheck(){
   const o=ovr();
-  if(AGE>=39||(AGE>=33&&o<60)) return C("Fim da linha","👟","estadio",`Aos ${AGE}, nenhum clube liga mais. O corpo avisa antes da cabeça aceitar.`,[O("👟","Pendurar as chuteiras",{},{end:"aposentou"})],{big:true});
-  return C("Fim de temporada","👟","casa",`Aos ${AGE}, você sente o joelho de manhã. A família pergunta se não está na hora.`,
+  if(AGE>=(P.pos==="GOL"?41:39)||(AGE>=33&&o<60)) return C("Fim da linha","👟","aposentadoria",`Aos ${AGE}, nenhum clube liga mais. O corpo avisa antes da cabeça aceitar.`,[O("👟","Pendurar as chuteiras",{},{end:"aposentou"})],{big:true});
+  return C("Fim de temporada","👟","aposentadoria",`Aos ${AGE}, você sente o joelho de manhã. A família pergunta se não está na hora.`,
     [O("💪🏽","Mais uma temporada",{}),O("👟","Pendurar as chuteiras",{},{end:"aposentou"})]);
 }
 function selTournamentW(){
@@ -326,7 +332,9 @@ function selTournamentW(){
   if(FL.lesao) {log(`Cortado da convocação por lesão`);return C(t.who,"💔","hospital",`A lesão te tirou da lista final. Você vai assistir ao torneio de casa.`,[O("📺","Assistir de casa",{moral:-15,cabeca:-4})],{bad:true});}
   return t;
 }
-function keyMoment(){FL.mod=0;const pool=KM.filter(k=>k.id!==FL.lastKM&&(!k.cond||k.cond()));const k=pick(pool);FL.lastKM=k.id;return Object.assign(k.mk(),{km:true});}
+// Cada momento-chave sai no máximo 3 vezes por carreira, nunca dois iguais em seguida
+function keyMoment(){FL.kmN=FL.kmN||{};const pool=KM.filter(k=>k.id!==FL.lastKM&&(FL.kmN[k.id]||0)<3&&(!k.cond||k.cond()));if(!pool.length) return null;
+  FL.mod=0;const k=pick(pool);FL.lastKM=k.id;FL.kmN[k.id]=(FL.kmN[k.id]||0)+1;return Object.assign(k.mk(),{km:true});}
 
 function startPro(sal){
   set({PHASE:"pro",WORLD:{tier:{},teams:{}}});FL.formador=FL.club;CAR.clubes.push(FL.club.n);FL.contrato={salario:sal,temp:3};FL.gastos=0;FL.mod=0;
