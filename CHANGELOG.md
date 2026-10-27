@@ -5,6 +5,11 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e
 
 ## [Não lançado]
 
+## [0.2.1] - 2026-10-26
+
+### Adicionado
+- Ilustrações das 9 cenas novas: `tecnico`, `empresario`, `torcida`, `bebe`, `peneira`, `penalti`, `aposentadoria`, `academia` e `defesa`. Nenhuma cena usa mais a reserva.
+
 ### Corrigido
 - O profissional começava em janeiro mesmo com o jogador ainda com 16 anos. Agora começa no primeiro janeiro em que ele já tem 17.
 - A tela do mês mostrava "Fevereiro De 2025"; agora só o mês fica com inicial maiúscula.
@@ -13,6 +18,7 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e
 - A lesão de joelho podia aparecer mais vezes que o limite quando os outros tipos de lesão já tinham saído. Agora, sem lesão nova disponível, a carta não aparece (o tempo fora continua valendo).
 
 ### Alterado
+- A final do sub-17 no prólogo mostra o estádio em vez da cena de pênalti, que tem um goleiro adulto.
 - Banimento menos frequente: o convite para manipular apostas aparece menos e, se aceito, dá 25% de chance de banimento (antes 40%).
 - Prints e GIF do README refeitos com a versão atual. O print da temporada ainda mostrava "Fevereiro De 2025" e um jogador de 16 anos no profissional; a ficha final agora é de uma carreira completa, até a aposentadoria.
 - Roadmap do README corrigido: campinho, CT, avião, mansão e carro já tinham ilustração desde a 0.1.0; faltam só as 9 cenas novas.

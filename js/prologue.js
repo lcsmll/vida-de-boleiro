@@ -59,9 +59,9 @@ function prologue(){
     A(15,"Base",C("Treinador do sub-17","📋","vestiario",`“A ${P.numero} é do titular. Quer ela? Ganha a vaga dele no treino.”`,
       [O("⏳","Esperar minha vez",{cabeca:10,bola:-4}),O("🔥","Ir pra cima no treino",{bola:8,corpo:-5,cabeca:-5})])),
     P.pos==="GOL"
-      ?A(16,"Final",C("Final do sub-17","🏆","penalti",`Pênaltis. Último batedor deles. Se você pegar, o título é de vocês. Ele ajeita a bola e te encara.`,
+      ?A(16,"Final",C("Final do sub-17","🏆","estadio",`Pênaltis. Último batedor deles. Se você pegar, o título é de vocês. Ele ajeita a bola e te encara.`,
         [O("🧍🏽","Esperar até o fim",{},{then:()=>penaltiBase(.28)}),O("↙️","Escolher um canto",{},{then:()=>penaltiBase(.22)})],{big:true}))
-      :A(16,"Final",C("Final do sub-17","🏆","penalti",`Um a um, acréscimos, pênalti pra vocês. O capitão te entrega a bola: “É tua.”`,
+      :A(16,"Final",C("Final do sub-17","🏆","estadio",`Um a um, acréscimos, pênalti pra vocês. O capitão te entrega a bola: “É tua.”`,
         [O("↘️","Bater no canto",{},{then:()=>penaltiBase(.45)}),O("🥄","Cavadinha",{fama:5},{then:()=>penaltiBase(.32)})],{big:true})),
     ()=>{set({AGE:16});const sal=clubSalary(FL.club,62)*.5;
       let t=`“Contrato profissional com o ${FL.club.n}: ${fmt(sal)} por ano, três temporadas. Você estreia no time de cima.”`;

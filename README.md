@@ -45,7 +45,7 @@ Por usar módulos ES, abrir o `index.html` direto do disco não funciona; precis
 
 ## Roadmap
 
-- [ ] Ilustrações das 9 cenas novas (técnico, empresário, torcida, bebê, peneira, pênalti, aposentadoria, academia, defesa). Até lá, cada uma mostra a ilustração mais parecida.
+- [x] Ilustrações das 9 cenas novas (técnico, empresário, torcida, bebê, peneira, pênalti, aposentadoria, academia, defesa).
 - [ ] Ajuste fino do balanceamento por posição (meta: Lenda rara em todas, inclusive goleiro e zagueiro).
 - [ ] Conquistas e um "hall da fama" das suas carreiras anteriores.
 - [ ] Compartilhar a ficha final como imagem direto no celular.

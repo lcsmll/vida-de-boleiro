@@ -92,14 +92,15 @@ function scene(k){
 
 // Pacote de arte (Higgsfield): assets/cenas/<chave>.webp, 1200×480
 const ART=Object.fromEntries(["rua","sinal","escola","estadio","hospital","imprensa","praia","aviao","dinheiro","carro","policia","trofeu","selecao","celular",
-  "campo_terra","campo_ct","vestiario_base","vestiario_pro","festa_base","festa_pro","casa_simples","casa_rica","contrato_simples","contrato_flash"]
+  "campo_terra","campo_ct","vestiario_base","vestiario_pro","festa_base","festa_pro","casa_simples","casa_rica","contrato_simples","contrato_flash",
+  "tecnico","empresario","torcida","bebe","peneira","penalti","aposentadoria","academia","defesa"]
   .map(k=>[k,`assets/cenas/${k}.webp`]));
 // Cenas com duas artes: [prólogo, profissional, só profissional acima de RICO por ano]
 const RICO=3e5;
 const VARS={campo:["campo_terra","campo_ct"],vestiario:["vestiario_base","vestiario_pro"],festa:["festa_base","festa_pro"],
   casa:["casa_simples","casa_rica",1],contrato:["contrato_simples","contrato_flash",1]};
 // Cenas novas ainda sem arte usam a cena mais parecida até a imagem existir em ART
-const RESERVA={tecnico:"vestiario",empresario:"contrato",torcida:"rua",bebe:"casa",peneira:"campo",penalti:"estadio",aposentadoria:"estadio",academia:"campo",defesa:"estadio"};
+const RESERVA={};
 const artKey=k=>{const v=VARS[k];if(!v) return k;return v[PHASE!=="pre"&&(!v[2]||salAtual()>RICO)?1:0];};
 
 export {RESERVA,hash,crest,shirt,shirtBack,scene,SKY,CROWD,FIELD,ART,RICO,VARS,artKey};
