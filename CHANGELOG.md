@@ -15,6 +15,7 @@ O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), e
 ### Alterado
 - Banimento menos frequente: o convite para manipular apostas aparece menos e, se aceito, dá 25% de chance de banimento (antes 40%).
 - Prints e GIF do README refeitos com a versão atual. O print da temporada ainda mostrava "Fevereiro De 2025" e um jogador de 16 anos no profissional; a ficha final agora é de uma carreira completa, até a aposentadoria.
+- Roadmap do README corrigido: campinho, CT, avião, mansão e carro já tinham ilustração desde a 0.1.0; faltam só as 9 cenas novas.
 
 ## [0.2.0] - 2026-10-21
 
